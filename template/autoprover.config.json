@@ -8,6 +8,7 @@
   "expect_window_on_schedule": true,
   "stop_on_overage": true,
   "allow_unknown_usage": false,
+  "require_five_hour_window": true,
 
   "dry_run": true,
   "test_run": false,

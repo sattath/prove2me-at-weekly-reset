@@ -68,6 +68,9 @@ DEFAULT_CONFIG = {
     "expect_window_on_schedule": True,
     "stop_on_overage": True,
     "allow_unknown_usage": False,
+    # Some accounts report no 5-hour window at all. Set to False to skip only that check;
+    # the weekly cap, the time window and the overage check still apply.
+    "require_five_hour_window": True,
     "dry_run": True,
     # One-off test of the whole pipeline: forces dry run, at most one claim, and skips the
     # pre-reset window rule (never the caps). Set it, click Run now, then set it back.
@@ -1903,6 +1906,8 @@ def usage_decision(u: dict, cfg: dict, mode: str = "continue", ignore_window: bo
     if mtr is not None:
         info["minutes_to_reset"] = round(mtr, 1)
     for name in ("five_hour", "seven_day"):
+        if name == "five_hour" and u.get(name) is None and not cfg.get("require_five_hour_window", True):
+            continue  # this account reports no 5-hour window at all; the weekly checks still apply
         if (u.get(name) or {}).get("utilization") is None:
             return no("unknown", f"usage unknown: {name} utilization not reported")
     mpc = float(cfg["minutes_per_claim"])

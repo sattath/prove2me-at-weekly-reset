@@ -122,6 +122,17 @@ class DecisionTests(Base):
         rc, out, _ = self.p2m("usage", "--from-file", str(bad))
         self.assertEqual((rc, json.loads(out)["decision"]["kind"]), (7, "unknown"))
 
+    def test_no_five_hour_window(self):
+        """An account that reports no 5-hour window: a no-go by default, a go with
+        require_five_hour_window false, and the weekly cap still applies then."""
+        self.config.write_text(json.dumps({"minutes_per_claim": 40, "require_five_hour_window": False}))
+        rc, out = self.usage(omit=("five_hour",))
+        self.assertEqual((rc, out["decision"]["kind"]), (0, "ok"))
+        rc, out = self.usage(omit=("five_hour",), week=0.85)
+        self.assertEqual((rc, out["decision"]["kind"]), (6, "limit"))
+        rc, out = self.usage(omit=("seven_day",))
+        self.assertEqual((rc, out["decision"]["kind"]), (7, "unknown"))
+
     def test_legacy_stop_at_utilization(self):
         self.config.write_text(json.dumps({"stop_at_utilization": 0.97}))
         self.assertEqual(self.usage(five=0.55)[0], 6)  # never raised above the 0.50 default

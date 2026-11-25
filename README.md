@@ -69,6 +69,7 @@ Design goal: **never harm the people who contribute.** A bug in this tool must n
 - **Hard caps.** Work stops once the 5-hour window reaches `max_five_hour_utilization` (50%) or the weekly window reaches `max_weekly_utilization` (80%). These are absolute fractions of each window, not of the leftover.
 - **Stricter limits for starting a claim.** A new claim starts only if the 5-hour window is at most 40% and the weekly window at most 75% (the caps minus `claim_start_margin_five_hour` and `claim_start_margin_weekly`), so a claim begun just under a cap has room to finish.
 - **No paid overage** (`stop_on_overage`, default on), and **no work if usage can't be read** (`allow_unknown_usage`, default off).
+- **Accounts without a 5-hour window.** If Claude reports no 5-hour window for your account, every run stops with `five_hour utilization not reported`. Set `require_five_hour_window` to `false` to skip only that check; the weekly cap, the time window and the overage check still apply.
 
 Where it is enforced: at run start (`p2m usage`), before each claim (`p2m usage --for start-claim`), inside every `p2m check` (before each Lean build; a reading up to 3 minutes old may be reused) and inside every `p2m submit`, dry runs included (always a fresh reading). On a no-go, `check` and `submit` exit with code 6 without building or submitting anything.
 
